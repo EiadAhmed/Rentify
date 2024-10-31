@@ -45,6 +45,7 @@ public class SpringConfig {
                     registry.requestMatchers("/admin/**").hasRole("ADMIN");
                     registry.requestMatchers("/user/**").hasAnyRole("USER", "ADMIN"); // Allow users with ROLE_USER
                     registry.requestMatchers("/ads/**").hasAnyRole("USER", "ADMIN");
+                    registry.requestMatchers("/reviews/**").hasAnyRole("USER", "ADMIN");
 
                     registry.anyRequest().authenticated();
 

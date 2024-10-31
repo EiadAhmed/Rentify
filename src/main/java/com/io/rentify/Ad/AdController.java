@@ -82,6 +82,38 @@ public class AdController {
         return chatMessageService.save(chatMessage);
     }
 
+    @PostMapping("/{adId}/reply")
+    public ChatMessage replyToUser(@PathVariable Long adId,
+                                   @RequestBody String messageContent,
+                                   @AuthenticationPrincipal UserDetails adPosterDetails) {
+        // Find the ad by adId
+        Ad ad = adService.findById(adId)
+                .orElseThrow(() -> new RuntimeException("Ad not found"));
+
+        // Get the ad poster (recipient)
+        User recipient = ad.getUser();
+
+        // Get the sender (the user who initiated the chat)
+        String senderId = chatMessageService.findSenderId(adId, recipient.getId().toString());
+        if (senderId == null) {
+            throw new RuntimeException("No sender found for this ad");
+        }
+
+        // Create a new ChatMessage
+        ChatMessage chatMessage = new ChatMessage();
+        chatMessage.setSenderId(recipient.getId().toString());
+        chatMessage.setRecipientId(senderId);
+        chatMessage.setContent(messageContent);
+        chatMessage.setAdId(adId); // Associate the message with the specific ad
+
+        // Save the message
+        return chatMessageService.save(chatMessage);
+    }
+
+
+
+
+
     @GetMapping("/{adId}/message")
     public ModelAndView openChatWithAdPoster(@PathVariable Long adId, @AuthenticationPrincipal UserDetails userDetails) {
         Ad ad = adService.findById(adId)
@@ -98,5 +130,6 @@ public class AdController {
 
         return modelAndView;
     }
+
 
 }
