@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +33,25 @@ public class User {
 
     private float ratings;
 
+    private String resetPasswordToken;
 
+    public String getResetPasswordToken() {
+        return resetPasswordToken;
+    }
+
+    public void setResetPasswordToken(String resetPasswordToken) {
+        this.resetPasswordToken = resetPasswordToken;
+    }
+
+    public LocalDateTime getTokenExpirationTime() {
+        return tokenExpirationTime;
+    }
+
+    public void setTokenExpirationTime(LocalDateTime tokenExpirationTime) {
+        this.tokenExpirationTime = tokenExpirationTime;
+    }
+
+    private LocalDateTime tokenExpirationTime;
 
     private Status status=Status.ONLINE;
     // Getters and Setters...

@@ -3,22 +3,24 @@ package com.io.rentify;
 
 
 import com.io.rentify.updatedUser.MyUserDetailService;
+import com.io.rentify.updatedUser.MyUserRepository;
 import com.io.rentify.updatedUser.User;
 import com.io.rentify.webtoken.JwtService;
 import com.io.rentify.webtoken.LoginForm;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class MainController {
@@ -31,6 +33,12 @@ public class MainController {
     @Autowired
     private MyUserDetailService myUserDetailService;
 
+    @Autowired
+    private MyUserRepository userRepository;
+
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
 
 
@@ -68,6 +76,28 @@ public class MainController {
     public ResponseEntity<List<User>> findConnectedUsers() {
         return ResponseEntity.ok(myUserDetailService.findConnectedUsers());
     }
+
+    @PostMapping("/password/reset")
+    public ResponseEntity<String> resetPassword(@RequestParam String token, @RequestParam String newPassword) {
+        Optional<User> userOptional = userRepository.findByResetPasswordToken(token);
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            if (user.getTokenExpirationTime().isBefore(LocalDateTime.now())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token expired");
+            }
+
+            user.setPasswordHash(passwordEncoder.encode(newPassword));
+            user.setResetPasswordToken(null); // Clear token after successful reset
+            user.setTokenExpirationTime(null);
+            userRepository.save(user);
+
+            return ResponseEntity.ok("Password reset successful");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid token");
+        }
+    }
+
 
 
 }

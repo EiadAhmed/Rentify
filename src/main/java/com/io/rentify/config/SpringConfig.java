@@ -41,7 +41,7 @@ public class SpringConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(registry -> {
 
-                    registry.requestMatchers("/home", "/register/**", "/authenticate").permitAll();
+                    registry.requestMatchers("/home", "/register/**", "/authenticate", "/password/forgot", "/password/reset").permitAll();
                     registry.requestMatchers("/admin/**").hasRole("ADMIN");
                     registry.requestMatchers("/user/**").hasAnyRole("USER", "ADMIN"); // Allow users with ROLE_USER
                     registry.requestMatchers("/ads/**").hasAnyRole("USER", "ADMIN");
