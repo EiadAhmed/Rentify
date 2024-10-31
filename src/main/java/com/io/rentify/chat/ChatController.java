@@ -28,15 +28,17 @@ public class ChatController {
                         String.valueOf(savedMsg.getId()),
                         savedMsg.getSenderId(),
                         savedMsg.getRecipientId(),
-                        savedMsg.getContent()
+                        savedMsg.getContent(),
+                        savedMsg.getAdId()
                 )
         );
     }
 
-    @GetMapping("/messages/{senderId}/{recipientId}")
-    public ResponseEntity<List<ChatMessage>> findChatMessages(@PathVariable String senderId,
-                                                              @PathVariable String recipientId) {
-        return ResponseEntity
-                .ok(chatMessageService.findChatMessages(senderId, recipientId));
+    @GetMapping("/messages/{adId}/{senderId}/{recipientId}")
+    public ResponseEntity<List<ChatMessage>> findChatMessages(
+            @PathVariable Long adId,
+            @PathVariable String senderId,
+            @PathVariable String recipientId) {
+        return ResponseEntity.ok(chatMessageService.findChatMessages(adId, senderId, recipientId));
     }
 }

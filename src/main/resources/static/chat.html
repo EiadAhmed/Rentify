@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat with Ad Poster</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+</head>
+<body>
+<h2>Chat with Ad Poster</h2>
+
+<div id="chat-box">
+    <!-- Messages will be displayed here -->
+</div>
+
+<input type="text" id="message-input" placeholder="Type a message...">
+<button onclick="sendMessage()">Send</button>
+
+<script>
+    const senderId = /*[[${senderId}]]*/ '';
+    const recipientId = /*[[${recipientId}]]*/ '';
+    const adId = /*[[${adId}]]*/ '';
+    const socket = new SockJS('/ws');
+    const stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function() {
+        stompClient.subscribe(`/user/${recipientId}/queue/messages`, function (message) {
+            displayMessage(JSON.parse(message.body));
+        });
+    });
+
+    function sendMessage() {
+        const messageContent = document.getElementById("message-input").value;
+        stompClient.send("/app/chat", {}, JSON.stringify({
+            senderId: senderId,
+            recipientId: recipientId,
+            content: messageContent,
+            adId: adId
+        }));
+        document.getElementById("message-input").value = '';
+    }
+
+    function displayMessage(message) {
+        const messageElement = document.createElement('p');
+        messageElement.textContent = message.content;
+        document.getElementById("chat-box").appendChild(messageElement);
+    }
+</script>
+</body>
+</html>

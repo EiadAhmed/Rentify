@@ -15,15 +15,17 @@ public class ChatMessageService {
 
     public ChatMessage save(ChatMessage chatMessage) {
         var chatId = chatRoomService
-                .getChatRoomId(chatMessage.getSenderId(), chatMessage.getRecipientId(), true)
-                .orElseThrow(); // You can create your own dedicated exception
+                .getChatRoomId(chatMessage.getSenderId(), chatMessage.getRecipientId(), chatMessage.getAdId(), true)
+                .orElseThrow();
         chatMessage.setChatId(chatId);
+        chatMessage.setAdId(chatMessage.getAdId());
         repository.save(chatMessage);
         return chatMessage;
     }
 
-    public List<ChatMessage> findChatMessages(String senderId, String recipientId) {
-        var chatId = chatRoomService.getChatRoomId(senderId, recipientId, false);
-        return chatId.map(repository::findByChatId).orElse(new ArrayList<>());
+    public List<ChatMessage> findChatMessages(Long adId, String senderId, String recipientId) {
+        var chatId = chatRoomService.getChatRoomId(senderId, recipientId, adId, false);
+        return chatId.map(id -> repository.findByChatIdAndAdId(id, adId)).orElse(new ArrayList<>());
     }
+
 }

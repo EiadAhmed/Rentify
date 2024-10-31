@@ -5,11 +5,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AdService {
     @Autowired
     private AdRepository adRepository;
+
+    public Optional<Ad> findById(Long adId) {
+        return adRepository.findById(adId);
+    }
 
     public Ad createAd(Ad ad) {
         return adRepository.save(ad);

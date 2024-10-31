@@ -11,32 +11,28 @@ public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
 
-    public Optional<String> getChatRoomId(
-            String senderId,
-            String recipientId,
-            boolean createNewRoomIfNotExists
-    ) {
+    public Optional<String> getChatRoomId(String senderId, String recipientId, Long adId, boolean createNewRoomIfNotExists) {
         return chatRoomRepository
-                .findBySenderIdAndRecipientId(senderId, recipientId)
+                .findBySenderIdAndRecipientIdAndAdId(senderId, recipientId, adId)
                 .map(ChatRoom::getChatId)
                 .or(() -> {
                     if (createNewRoomIfNotExists) {
-                        var chatId = createChatId(senderId, recipientId);
+                        var chatId = createChatId(senderId, recipientId, adId);
                         return Optional.of(chatId);
                     }
-
                     return Optional.empty();
                 });
     }
 
-    private String createChatId(String senderId, String recipientId) {
-        var chatId = String.format("%s_%s", senderId, recipientId);
+    private String createChatId(String senderId, String recipientId, Long adId) {
+        var chatId = String.format("%s_%s_%s",adId, senderId, recipientId);
 
         ChatRoom senderRecipient = ChatRoom
                 .builder()
                 .chatId(chatId)
                 .senderId(senderId)
                 .recipientId(recipientId)
+                .adId(adId)
                 .build();
 
         ChatRoom recipientSender = ChatRoom
@@ -44,6 +40,7 @@ public class ChatRoomService {
                 .chatId(chatId)
                 .senderId(recipientId)
                 .recipientId(senderId)
+                .adId(adId)
                 .build();
 
         chatRoomRepository.save(senderRecipient);
