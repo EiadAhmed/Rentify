@@ -6,12 +6,14 @@ import com.io.rentify.chat.ChatMessageService;
 import com.io.rentify.updatedUser.User;
 import com.io.rentify.updatedUser.MyUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
@@ -52,17 +54,27 @@ public class AdController {
 
     }
 
-    @PutMapping("/{adId}")
-    public ResponseEntity<Ad> updateAd(@PathVariable Long adId, @RequestBody Ad updatedAd, @AuthenticationPrincipal UserDetails userDetails) {
-        User user = myUserRepository.findByEmail(userDetails.getUsername())
+    private User user;
+
+    private void checkUser(@PathVariable Long adId, @AuthenticationPrincipal UserDetails userDetails) {
+        user = myUserRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        return ResponseEntity.ok(adService.updateAd(adId, updatedAd, user));
+        Ad ad = adService.findById(adId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ad not found"));
+        if (!ad.getUser().getEmail().equals(userDetails.getUsername())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to update this ad");
+        }
     }
 
+    @PutMapping("/{adId}")
+    public ResponseEntity<Ad> updateAd(@PathVariable Long adId, @RequestBody Ad updatedAd, @AuthenticationPrincipal UserDetails userDetails) {
+        checkUser(adId, userDetails);
+
+        return ResponseEntity.ok(adService.updateAd(adId, updatedAd, user));
+    }
     @DeleteMapping("/{adId}")
     public ResponseEntity<Void> deleteAd(@PathVariable Long adId, @AuthenticationPrincipal UserDetails userDetails) {
-        User user = myUserRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        checkUser(adId, userDetails);
         adService.deleteAd(adId, user);
         return ResponseEntity.noContent().build();
     }
