@@ -1,6 +1,5 @@
 package com.io.rentify.updatedUser;
 
-import com.io.rentify.Ad.Ad;
 import com.io.rentify.webtoken.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -61,6 +60,7 @@ public class UserController {
             existingUser.setName(updatedUser.getName());
             existingUser.setEmail(updatedUser.getEmail());
             existingUser.setPhone(updatedUser.getPhone());
+            existingUser.setProfilePicture(updatedUser.getProfilePicture());
             existingUser.setRole(updatedUser.getRole());
             existingUser.setPremiumStatus(updatedUser.isPremiumStatus());
             existingUser.setRatings(updatedUser.getRatings());

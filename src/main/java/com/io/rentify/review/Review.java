@@ -1,15 +1,14 @@
 package com.io.rentify.review;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-
 @Entity
+@Setter
+@Getter
 @Table(name = "review")
 public class Review {
 

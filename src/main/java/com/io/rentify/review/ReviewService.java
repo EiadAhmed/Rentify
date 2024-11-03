@@ -1,11 +1,14 @@
 package com.io.rentify.review;
 
+
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import java.util.Optional;
 import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
@@ -16,11 +19,21 @@ public class ReviewService {
 
     // Save a new review
     public Review saveReview(Review review) {
+        if (review.getRating() < 1 || review.getRating() > 5) {
+            throw new IllegalArgumentException("Rating must be between 1 and 5");
+        }
+        if (reviewRepository.findByAdIdAndUserId(review.getAdId(), review.getUserId()) != null) {
+            throw new IllegalArgumentException("Only one review per ad is allowed");
+        }
         return reviewRepository.save(review);
     }
 
     // Get a review by its ID
     public Optional<Review> getReviewById(Long reviewId) {
+        if (reviewId == null) {
+            throw new IllegalArgumentException("Review ID cannot be null");
+        }
+
         return reviewRepository.findById(reviewId);
     }
 
@@ -30,7 +43,14 @@ public class ReviewService {
     }
 
     // Update an existing review
-    public Review updateReview(Review updatedReview) {
+    public Review updateReview(Review updatedReview)
+    {
+        if (updatedReview.getRating() < 1 || updatedReview.getRating() > 5) {
+            throw new IllegalArgumentException("Rating must be between 1 and 5");
+        }
+        if (reviewRepository.findByAdIdAndUserId(updatedReview.getAdId(), updatedReview.getUserId()) == null) {
+            throw new IllegalArgumentException("Review does not exist");
+        }
         return reviewRepository.save(updatedReview);
     }
 

@@ -1,9 +1,17 @@
 package com.io.rentify.review;
 
+import com.io.rentify.updatedUser.MyUserRepository;
+import com.io.rentify.updatedUser.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/reviews")
@@ -11,29 +19,57 @@ public class ReviewController {
 
     @Autowired
     private ReviewService reviewService;
+    @Autowired
+    private MyUserRepository myUserRepository;
 
     @PostMapping
-    public Review createReview(@RequestBody Review review) {
-        return reviewService.saveReview(review);
+    public ResponseEntity<Review> createReview(@RequestBody Review review, @AuthenticationPrincipal UserDetails userDetails) {
+        User user = getUserFromDetails(userDetails);
+        review.setUserId(user.getId());
+        Review savedReview = reviewService.saveReview(review);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedReview);
     }
 
     @GetMapping("/{id}")
-    public Optional<Review> getReview(@PathVariable Long id) {
-        return reviewService.getReviewById(id);
+    public ResponseEntity<Review> getReview(@PathVariable Long id) {
+        Review review = reviewService.getReviewById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Review not found"));
+        return ResponseEntity.ok(review);
     }
 
     @GetMapping("/ad/{adId}")
-    public List<Review> getReviewsByAdId(@PathVariable Long adId) {
-        return reviewService.getReviewsByAdId(adId);
+    public ResponseEntity<List<Review>> getReviewsByAdId(@PathVariable Long adId) {
+        List<Review> reviews = reviewService.getReviewsByAdId(adId);
+        return ResponseEntity.ok(reviews);
     }
 
-    @PutMapping
-    public Review updateReview(@RequestBody Review review) {
-        return reviewService.updateReview(review);
+    @PutMapping("/{id}")
+    public ResponseEntity<Review> updateReview(@PathVariable Long id, @RequestBody Review review, @AuthenticationPrincipal UserDetails userDetails) {
+        User user = getUserFromDetails(userDetails);
+        review.setUserId(user.getId());
+        Review existingReview = reviewService.getReviewById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Review not found"));
+        if (!Objects.equals(existingReview.getUserId(), user.getId())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        Review updatedReview = reviewService.updateReview(review);
+        return ResponseEntity.ok(updatedReview);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteReview(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteReview(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
+        User user = getUserFromDetails(userDetails);
+        Review existingReview = reviewService.getReviewById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Review not found"));
+        if (!Objects.equals(existingReview.getUserId(), user.getId())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         reviewService.deleteReview(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    private User getUserFromDetails(UserDetails userDetails) {
+        return myUserRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 }

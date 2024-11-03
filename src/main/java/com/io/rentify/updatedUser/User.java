@@ -26,8 +26,18 @@ public class User {
 
     private String phone;
 
+    private String profilePicture;
+
     @Column(nullable = false)
     private String role; // Role can be a comma-separated list of roles, e.g., "ADMIN,USER"
+
+    public String getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
+    }
 
     private boolean premiumStatus;
 

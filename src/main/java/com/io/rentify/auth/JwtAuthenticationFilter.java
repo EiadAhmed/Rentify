@@ -1,4 +1,4 @@
-package com.io.rentify.Auth;
+package com.io.rentify.auth;
 
 
 

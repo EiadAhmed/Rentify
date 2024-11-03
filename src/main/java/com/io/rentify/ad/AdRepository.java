@@ -1,4 +1,4 @@
-package com.io.rentify.Ad;
+package com.io.rentify.ad;
 
 
 import com.io.rentify.updatedUser.User;

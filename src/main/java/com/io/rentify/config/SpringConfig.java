@@ -2,7 +2,7 @@ package com.io.rentify.config;
 
 
 
-import com.io.rentify.Auth.JwtAuthenticationFilter;
+import com.io.rentify.auth.JwtAuthenticationFilter;
 import com.io.rentify.updatedUser.CustomOAuth2SuccessHandler;
 import com.io.rentify.updatedUser.MyUserDetailService;
 import com.io.rentify.updatedUser.MyUserRepository;
@@ -42,11 +42,12 @@ public class SpringConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(registry -> {
 
-                    registry.requestMatchers("/home", "/register/**", "/authenticate", "/password/forgot", "/password/reset").permitAll();
+                    registry.requestMatchers("/home", "/register/**", "/authenticate", "/password/forgot", "/password/reset", "/ws/**", "/**").permitAll();
                     registry.requestMatchers("/admin/**").hasRole("ADMIN");
                     registry.requestMatchers("/user/**").hasAnyRole("USER", "ADMIN"); // Allow users with ROLE_USER
                     registry.requestMatchers("/ads/**").hasAnyRole("USER", "ADMIN");
                     registry.requestMatchers("/reviews/**").hasAnyRole("USER", "ADMIN");
+                    registry.requestMatchers("/bookings/**").hasAnyRole("USER", "ADMIN");
                     registry.requestMatchers("/api/users/{id}").hasAnyRole("USER", "ADMIN");
                     registry.requestMatchers("/api/users/**").hasRole("ADMIN");
 
@@ -55,11 +56,16 @@ public class SpringConfig {
 
                 })
                 .exceptionHandling(handling -> handling
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                            response.getWriter().write("Unauthorized - Please login");
+                        })
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            // Return a forbidden response without redirecting
                             response.setStatus(HttpStatus.FORBIDDEN.value());
                             response.getWriter().write("Access Denied");
-                        }))
+                        })
+
+                )
                 .oauth2Login(oauth2login -> {
                     oauth2login.successHandler(oAuth2SuccessHandler());
                 })
