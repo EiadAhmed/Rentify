@@ -26,6 +26,8 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         this.passwordEncoder = passwordEncoder;
     }
 
+
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
