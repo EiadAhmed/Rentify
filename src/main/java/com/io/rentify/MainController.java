@@ -87,7 +87,7 @@ public class MainController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token expired");
             }
 
-            user.setPasswordHash(passwordEncoder.encode(newPassword));
+            user.setPassword(passwordEncoder.encode(newPassword));
             user.setResetPasswordToken(null); // Clear token after successful reset
             user.setTokenExpirationTime(null);
             userRepository.save(user);

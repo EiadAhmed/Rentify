@@ -19,7 +19,7 @@ public class RegistrationController {
 
     @PostMapping("/register/user")
     public User createUser(@RequestBody User user) {
-        user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash()));
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return myUserRepository.save(user);
     }
 }

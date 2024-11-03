@@ -47,7 +47,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
             newUser.setEmail(email);
             newUser.setName(token.getPrincipal().getAttribute("name"));
             newUser.setRole("USER"); // Assign a default role for OAuth2 users
-            newUser.setPasswordHash(passwordEncoder.encode("google_oauth_user"));
+            newUser.setPassword(passwordEncoder.encode("google_oauth_user"));
             userRepository.save(newUser);
 
             // Set authentication for new user
