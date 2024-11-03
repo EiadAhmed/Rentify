@@ -9,6 +9,7 @@ import com.io.rentify.updatedUser.MyUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
@@ -53,6 +54,12 @@ public class SpringConfig {
                     registry.anyRequest().authenticated();
 
                 })
+                .exceptionHandling(handling -> handling
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            // Return a forbidden response without redirecting
+                            response.setStatus(HttpStatus.FORBIDDEN.value());
+                            response.getWriter().write("Access Denied");
+                        }))
                 .oauth2Login(oauth2login -> {
                     oauth2login.successHandler(oAuth2SuccessHandler());
                 })
