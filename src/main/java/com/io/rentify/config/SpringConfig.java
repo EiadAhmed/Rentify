@@ -33,6 +33,9 @@ public class SpringConfig {
     @Autowired
     private MyUserRepository userRepository;
 
+
+
+
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -42,7 +45,7 @@ public class SpringConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(registry -> {
 
-                    registry.requestMatchers("/home", "/register/**", "/authenticate", "/password/forgot", "/password/reset", "/ws/**", "/**").permitAll();
+                    registry.requestMatchers("/home", "/register/**", "/authenticate", "/password/forgot", "/password/reset", "/ws/**", "/login").permitAll();
                     registry.requestMatchers("/admin/**").hasRole("ADMIN");
                     registry.requestMatchers("/user/**").hasAnyRole("USER", "ADMIN"); // Allow users with ROLE_USER
                     registry.requestMatchers("/ads/**").hasAnyRole("USER", "ADMIN");
@@ -55,17 +58,17 @@ public class SpringConfig {
                     registry.anyRequest().authenticated();
 
                 })
-                .exceptionHandling(handling -> handling
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                            response.getWriter().write("Unauthorized - Please login");
-                        })
-                        .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            response.setStatus(HttpStatus.FORBIDDEN.value());
-                            response.getWriter().write("Access Denied");
-                        })
-
-                )
+//                .exceptionHandling(handling -> handling
+//                        .authenticationEntryPoint((request, response, authException) -> {
+//                            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+//                            response.getWriter().write("Unauthorized - Please login");
+//                        })
+//                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+//                            response.setStatus(HttpStatus.FORBIDDEN.value());
+//                            response.getWriter().write("Access Denied");
+//                        })
+//
+//                )
                 .oauth2Login(oauth2login -> {
                     oauth2login.successHandler(oAuth2SuccessHandler());
                 })

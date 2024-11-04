@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 @Service
 public class BookingService {
 
@@ -24,6 +25,13 @@ public class BookingService {
         if (hasOverlap(booking.getAdId(), booking.getStartDate(), booking.getEndDate())) {
             throw new IllegalArgumentException("Booking time overlaps with an existing booking for this ad.");
         }
+        if (booking.getStartDate().isAfter(booking.getEndDate())) {
+            throw new IllegalArgumentException("Start date must be before end date");
+        }
+        if (booking.getRenterId() == null) {
+            throw new IllegalArgumentException("Renter ID cannot be null");
+        }
+
 
         booking.setBookingDate(LocalDateTime.now());
         booking.setStatus(BookingStatus.PENDING);  // Default status
@@ -52,7 +60,12 @@ public class BookingService {
         if (hasOverlap(updatedBooking.getAdId(), updatedBooking.getStartDate(), updatedBooking.getEndDate())) {
             throw new IllegalArgumentException("Booking time overlaps with an existing booking for this ad.");
         }
-
+        if (updatedBooking.getStartDate().isAfter(updatedBooking.getEndDate())) {
+            throw new IllegalArgumentException("Start date must be before end date");
+        }
+        if (!existingBooking.getRenterId().equals(updatedBooking.getRenterId())) {
+            throw new IllegalArgumentException("Unauthorized to update this booking");
+        }
         existingBooking.setStartDate(updatedBooking.getStartDate());
         existingBooking.setEndDate(updatedBooking.getEndDate());
         existingBooking.setStatus(updatedBooking.getStatus());
@@ -71,4 +84,3 @@ public class BookingService {
         return bookingRepository.findAll();
     }
 }
-

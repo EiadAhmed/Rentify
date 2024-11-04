@@ -3,6 +3,8 @@ package com.io.rentify.review;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,6 +21,6 @@ public class Review {
     Long adId;
     String review_text;
     float rating;
-    String date;
+    String date= LocalDateTime.now().toString();
 
 }

@@ -4,10 +4,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -20,6 +23,9 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
     private final MyUserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private static final Logger logger = LoggerFactory.getLogger(CustomOAuth2SuccessHandler.class);
+
+    @Autowired
+    private OAuth2AuthorizedClientService authorizedClientService;
 
     public CustomOAuth2SuccessHandler(MyUserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
@@ -34,6 +40,13 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         OAuth2AuthenticationToken token = (OAuth2AuthenticationToken) authentication;
         String email = token.getPrincipal().getAttribute("email");
         logger.info("Google login successful for email: " + email);
+
+
+        OAuth2AuthorizedClient authorizedClient = authorizedClientService.loadAuthorizedClient(
+                token.getAuthorizedClientRegistrationId(), token.getName());
+        String accessToken = authorizedClient.getAccessToken().getTokenValue();
+        logger.info("Bearer token: " + accessToken); // Log the actual Bearer token.
+
 
         Optional<User> existingUser = userRepository.findByEmail(email);
 

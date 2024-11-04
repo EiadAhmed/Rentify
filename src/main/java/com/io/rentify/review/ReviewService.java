@@ -19,6 +19,7 @@ public class ReviewService {
 
     // Save a new review
     public Review saveReview(Review review) {
+
         if (review.getRating() < 1 || review.getRating() > 5) {
             throw new IllegalArgumentException("Rating must be between 1 and 5");
         }
@@ -51,7 +52,16 @@ public class ReviewService {
         if (reviewRepository.findByAdIdAndUserId(updatedReview.getAdId(), updatedReview.getUserId()) == null) {
             throw new IllegalArgumentException("Review does not exist");
         }
-        return reviewRepository.save(updatedReview);
+        Review existingReview =
+                reviewRepository.findByAdIdAndUserId(updatedReview.getAdId(), updatedReview.getUserId());
+        if (!existingReview.getUserId().equals(updatedReview.getUserId())) {
+            throw new IllegalArgumentException("User ID does not match");
+        }
+        existingReview.setReview_text(updatedReview.getReview_text());
+        existingReview.setRating(updatedReview.getRating());
+
+
+        return reviewRepository.save(existingReview);
     }
 
     // Delete a review by its ID
