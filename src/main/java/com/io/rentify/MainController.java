@@ -2,17 +2,17 @@ package com.io.rentify;
 
 
 
-import com.io.rentify.updatedUser.MyUserDetailService;
-import com.io.rentify.updatedUser.MyUserRepository;
-import com.io.rentify.updatedUser.User;
+import com.io.rentify.updatedUser.*;
 import com.io.rentify.webtoken.JwtService;
 import com.io.rentify.webtoken.LoginForm;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @RestController
 public class MainController {
 
@@ -52,8 +53,10 @@ public class MainController {
     }
     @GetMapping("/user/home")
     public String handelUserHome() {
-        return "home_user!";
+        return "home_user";
     }
+
+
 
     @GetMapping("/user")
     public Principal user(Principal user) {
@@ -61,17 +64,50 @@ public class MainController {
 
     }
 
+
     @PostMapping("/authenticate")
-    public String authenticateAndGetToken(@RequestBody LoginForm loginForm) {
+    public LoginResponse authenticateAndGetToken(@RequestBody LoginForm loginForm) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginForm.username(), loginForm.password()
         ));
         if (authentication.isAuthenticated()) {
-            return jwtService.generateToken(myUserDetailService.loadUserByUsername(loginForm.username()));
+            // Load user details
+            UserDetails user = myUserDetailService.loadUserByUsername(loginForm.username());
+            Optional<User> useri = userRepository.findByEmail(loginForm.username());
+
+
+
+            // Generate JWT token
+            String token = jwtService.generateToken(user);
+            // Return response with token and user ID
+
+            return new LoginResponse(token, useri.get().getId());  // Assuming User entity has getId()
         } else {
             throw new UsernameNotFoundException("Invalid credentials");
         }
     }
+
+    @PostMapping("/api/authenticate")
+    public ResponseEntity<?> authenticateAndGetTokenApi(@RequestBody LoginForm loginForm) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginForm.username(), loginForm.password())
+        );
+
+        if (authentication.isAuthenticated()) {
+            UserDetails user = myUserDetailService.loadUserByUsername(loginForm.username());
+            Optional<User> useri = userRepository.findByEmail(loginForm.username());
+
+            // Generate JWT token
+            String token = jwtService.generateToken(user);
+
+            // Return token and user details as JSON (for API clients)
+            return ResponseEntity.ok(new LoginResponse(token, useri.get().getId()));
+        } else {
+            throw new UsernameNotFoundException("Invalid credentials");
+        }
+    }
+
+
     @GetMapping("/users")
     public ResponseEntity<List<User>> findConnectedUsers() {
         return ResponseEntity.ok(myUserDetailService.findConnectedUsers());

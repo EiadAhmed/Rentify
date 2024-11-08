@@ -25,6 +25,10 @@ public class AdService {
         return adRepository.findByUser(user);
     }
 
+    public List<Ad> getAllAds() {
+        return adRepository.findAll();
+    }
+
     public Ad updateAvailability(Long adId, Ad.Availability availability) {
         Ad ad = adRepository.findById(adId).orElseThrow(() -> new RuntimeException("Ad not found"));
         ad.setAvailability(availability);

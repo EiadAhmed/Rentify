@@ -16,6 +16,11 @@ public class CustomUserDetails implements UserDetails {
     }
 
     // Expose additional fields
+
+    public Long getId() {
+        return user.getId();
+    }
+
     public String getPhone() {
         return user.getPhone();
     }

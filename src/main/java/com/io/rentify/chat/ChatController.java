@@ -1,6 +1,9 @@
 package com.io.rentify.chat;
 
+import com.io.rentify.chatroom.ChatRoom;
+import com.io.rentify.chatroom.ChatRoomRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -20,6 +23,7 @@ public class ChatController {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final ChatMessageService chatMessageService;
+    private final ChatRoomRepository chatRoomRepository;
 
     @MessageMapping("/chat")
     public void processMessage(@Payload ChatMessage chatMessage) {
@@ -43,4 +47,11 @@ public class ChatController {
             @PathVariable String recipientId) {
         return ResponseEntity.ok(chatMessageService.findChatMessages(adId, senderId, recipientId));
     }
+
+    @GetMapping("/api/chatrooms/{userId}")
+    public ResponseEntity<List<ChatRoom>> getUserChatRooms(@PathVariable String userId) {
+        List<ChatRoom> chatRooms = chatRoomRepository.findBySenderIdOrRecipientId(userId, userId);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(chatRooms);
+    }
+
 }

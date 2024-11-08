@@ -11,14 +11,14 @@ const logout = document.querySelector('#logout');
 
 let stompClient = null;
 let email = null;
-let name = null;
+let password = null;
 let selectedUserId = null;
 
 function connect(event) {
-    email = document.querySelector('#email').value.trim();
-    name = document.querySelector('#name').value.trim();
+    email = document.querySelector('#username').value.trim();
+    password = document.querySelector('#password').value.trim();
 
-    if (email && name) {
+    if (email && password) {
         usernamePage.classList.add('hidden');
         chatPage.classList.remove('hidden');
 
