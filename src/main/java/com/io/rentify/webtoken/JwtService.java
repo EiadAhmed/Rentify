@@ -44,6 +44,16 @@ public class JwtService {
         return claims.getSubject();
     }
 
+    public String extractRoles(String jwt) {
+        Claims claims = getClaims(jwt);
+        return claims.get("roles", String.class);
+    }
+
+    public String extractId(String jwt) {
+        Claims claims = getClaims(jwt);
+        return claims.getId();
+    }
+
     private Claims getClaims(String jwt) {
         return Jwts.parser()
                 .verifyWith(generateKey())

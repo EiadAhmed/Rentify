@@ -17,6 +17,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,10 +43,12 @@ public class SpringConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
+
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(registry -> {
 
-                    registry.requestMatchers("/home", "/register/**", "/authenticate", "/password/forgot", "/password/reset", "/ws/**", "/login").permitAll();
+                    registry.requestMatchers("/home", "/register/**", "/authenticate","/api/authenticate", "/password/forgot", "/password/reset", "/ws/**", "/login", "/chatpage","/**").permitAll();
                     registry.requestMatchers("/admin/**").hasRole("ADMIN");
                     registry.requestMatchers("/user/**").hasAnyRole("USER", "ADMIN"); // Allow users with ROLE_USER
                     registry.requestMatchers("/ads/**").hasAnyRole("USER", "ADMIN");
@@ -58,22 +61,20 @@ public class SpringConfig {
                     registry.anyRequest().authenticated();
 
                 })
-//                .exceptionHandling(handling -> handling
-//                        .authenticationEntryPoint((request, response, authException) -> {
-//                            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-//                            response.getWriter().write("Unauthorized - Please login");
-//                        })
-//                        .accessDeniedHandler((request, response, accessDeniedException) -> {
-//                            response.setStatus(HttpStatus.FORBIDDEN.value());
-//                            response.getWriter().write("Access Denied");
-//                        })
-//
-//                )
-                .oauth2Login(oauth2login -> {
-                    oauth2login.successHandler(oAuth2SuccessHandler());
-                })
-                .formLogin(Customizer.withDefaults())
-                .addFilterBefore(jwtAuthenticationFilter , UsernamePasswordAuthenticationFilter.class)
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Make API endpoints stateless
+                .formLogin(formLogin -> formLogin
+                        .loginPage("/login")
+//                        .loginProcessingUrl("/authenticate")
+                        .defaultSuccessUrl("/user/home", true)
+                        .failureUrl("/login?error=true")
+                        .permitAll()
+                )
+                .oauth2Login(oauth2login -> oauth2login
+                        .loginPage("/login")  // Optional: serve OAuth2 login from the same custom page
+                        .successHandler(oAuth2SuccessHandler())  // Custom success handler for OAuth2 logins
+                )
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

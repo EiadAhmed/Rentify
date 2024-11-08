@@ -53,6 +53,11 @@ public class AdController {
 
 
     }
+    @GetMapping("/all")
+    public ResponseEntity<List<Ad>> getAllAds() {
+        List<Ad> ads = adService.getAllAds();
+        return ResponseEntity.ok(ads);
+    }
 
     private User user;
 
@@ -155,22 +160,7 @@ public class AdController {
 
 
 
-    @GetMapping("/{adId}/message")
-    public ModelAndView openChatWithAdPoster(@PathVariable Long adId, @AuthenticationPrincipal UserDetails userDetails) {
-        Ad ad = adService.findById(adId)
-                .orElseThrow(() -> new RuntimeException("Ad not found"));
 
-        User sender = myUserRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        User recipient = ad.getUser();
-
-        ModelAndView modelAndView = new ModelAndView("chat");  // chat.html page
-        modelAndView.addObject("senderId", sender.getId());
-        modelAndView.addObject("recipientId", recipient.getId());
-        modelAndView.addObject("adId", adId);
-
-        return modelAndView;
-    }
 
 
 }
