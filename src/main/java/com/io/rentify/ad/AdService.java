@@ -62,4 +62,42 @@ public class AdService {
 
         adRepository.delete(ad);
     }
+
+
+    public List<Ad> searchAds(String title, String location, String category, Float minPrice, Float maxPrice, Ad.Availability availability) {
+        if (title != null && location != null) {
+            return adRepository.findByTitleContainingIgnoreCaseAndLocationContainingIgnoreCase(title, location);
+        }
+
+        if (category != null && availability != null) {
+            return adRepository.findByCategoryContainingIgnoreCaseAndAvailability(category, availability);
+        }
+
+        if (minPrice != null && maxPrice != null) {
+            return adRepository.findByPriceBetween(minPrice, maxPrice);
+        }
+
+        if (title != null) {
+            return adRepository.findByTitleContainingIgnoreCase(title);
+        }
+
+        if (location != null) {
+            return adRepository.findByLocationContainingIgnoreCase(location);
+        }
+
+        if (category != null) {
+            return adRepository.findByCategoryContainingIgnoreCase(category);
+        }
+
+        if (availability != null) {
+            return adRepository.findByAvailability(availability);
+        }
+
+        return adRepository.findAll(); // Return all if no filter is applied
+    }
+
+
+    public List<Ad> getSimilarAds(Ad ad) {
+        return adRepository.findByCategoryContainingIgnoreCase(ad.getCategory());
+    }
 }

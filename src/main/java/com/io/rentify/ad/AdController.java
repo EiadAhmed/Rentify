@@ -106,6 +106,27 @@ public class AdController {
         return adService.updateAvailability(adId, availability);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<Ad>> searchAds(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) Float minPrice,
+            @RequestParam(required = false) Float maxPrice,
+            @RequestParam(required = false) Ad.Availability availability) {
+
+        List<Ad> ads = adService.searchAds(title, location, category, minPrice, maxPrice, availability);
+
+        return ResponseEntity.ok(ads);
+    }
+
+    @GetMapping("/{adId}/similar")
+    public ResponseEntity<List<Ad>> getSimilarAds(@PathVariable Long adId) {
+        Ad ad = adService.findById(adId).orElseThrow(() -> new RuntimeException("Ad not found"));
+        List<Ad> similarAds = adService.getSimilarAds(ad);
+        return ResponseEntity.ok(similarAds);
+    }
+
 
 
 
