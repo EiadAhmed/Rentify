@@ -3,80 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Login</title>
+    <title>Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f8fc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+
+        .login-container label {
+            display: block;
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .login-container input[type="email"],
+        .login-container input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .login-container button {
+            width: 100%;
+            padding: 12px;
+            background-color: #3498db;
+            border: none;
+            color: #fff;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .login-container button:hover {
+            background-color: #2980b9;
+        }
+
+        .login-container .forgot-password {
+            display: block;
+            text-align: right;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        .login-container .forgot-password:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-<!-- Login Form -->
-<div id="login-section">
+<div class="login-container">
     <h2>Login</h2>
-    <form id="login-form">
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-        <label for="password">Password:</label>
+    <form id="loginForm">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="username" required>
+
+        <label for="password">Password</label>
         <input type="password" id="password" name="password" required>
+
         <button type="submit">Login</button>
+        <a href="/password/forgot" class="forgot-password">Forgot Password?</a>
+    </form>
+    <form action="/api/oauth2/authorization/google" method="GET">
+        <button type="submit" class="login-with-google-btn">
+            Sign in with Google
+        </button>
+    </form>
+    <form action="/api/oauth2/authorization/facebook" method="GET">
+        <button type="submit" class="login-with-google-btn">
+            Sign in with Facebook
+        </button>
     </form>
 </div>
 
-<!-- Chat Rooms Section (hidden initially) -->
-<div id="chat-rooms-section" style="display: none;">
-    <h2>Your Chat Rooms</h2>
-    <ul id="chat-rooms-list"></ul>
-</div>
-
 <script>
-    // Login Form Submission
-    document.getElementById('login-form').addEventListener('submit', async (event) => {
-        event.preventDefault();
-
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-
+    async function login(username, password) {
         try {
-            // Authenticate user
-            const loginResponse = await fetch('http://localhost:8080/api/authenticate', {
+            const response = await fetch('/api/authenticate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({ username, password })
             });
 
-            if (!loginResponse.ok) {
-                throw new Error('Failed to log in. Please check your credentials.');
+            if (response.ok) {
+                const data = await response.json();
+                // Store userId and token in local storage
+                console.log(data);
+                localStorage.setItem('userId', data.userId);
+                localStorage.setItem('token', data.token);
+                // Redirect user or initialize chat
+                initializeChat();
+            } else {
+                const errorData = await response.json();
+                alert(errorData.message || 'Login failed');
             }
-
-            const loginData = await loginResponse.json();
-            const userId = loginData.userId; // Assuming the server returns userId in the response
-
-            // Fetch chat rooms with the obtained userId
-            const chatRoomsResponse = await fetch(`http://localhost:8080/api/chatrooms/${userId}`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
-            });
-
-            if (!chatRoomsResponse.ok) {
-                throw new Error('Failed to fetch chat rooms.');
-            }
-
-            const chatRoomsData = await chatRoomsResponse.json();
-
-            // Display chat rooms
-            document.getElementById('login-section').style.display = 'none';
-            document.getElementById('chat-rooms-section').style.display = 'block';
-
-            const chatRoomsList = document.getElementById('chat-rooms-list');
-            chatRoomsList.innerHTML = ''; // Clear previous chat rooms
-
-            chatRoomsData.forEach(chatRoom => {
-                const li = document.createElement('li');
-                li.textContent = `Chat Room: ${chatRoom.title}`;
-                chatRoomsList.appendChild(li);
-            });
-
         } catch (error) {
-            console.error(error);
-            alert(error.message);
+            console.error('An error occurred during login:', error);
+            alert('A network error occurred. Please try again later.');
         }
+    }
+
+    document.getElementById("loginForm").addEventListener("submit", async function(event) {
+        event.preventDefault();
+        const username = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        await login(username, password);
     });
+
+    function initializeChat() {
+        // Replace this with actual chat initialization logic or redirect
+        console.log("User logged in, initializing chat...");
+    }
 </script>
 </body>
 </html>

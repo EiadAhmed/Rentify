@@ -48,7 +48,7 @@ public class SpringConfig {
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(registry -> {
 
-                    registry.requestMatchers("/home", "/register/**", "/authenticate","/api/authenticate", "/password/forgot", "/password/reset", "/ws/**", "/login", "/chatpage").permitAll();
+                    registry.requestMatchers("/home", "/register/**", "/authenticate","/api/authenticate", "/password/forgot", "/password/reset", "/ws/**", "/api/login", "/chatpage").permitAll();
                     registry.requestMatchers("/admin/**").hasRole("ADMIN");
                     registry.requestMatchers("/user/**").hasAnyRole("USER", "ADMIN"); // Allow users with ROLE_USER
                     registry.requestMatchers("/ads/**").hasAnyRole("USER", "ADMIN");

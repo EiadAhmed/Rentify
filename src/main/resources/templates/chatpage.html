@@ -259,13 +259,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 <script>
     let stompClient = null;
-    const userId = 3; // Replace with the sender's user ID
+    const userId = localStorage.getItem('userId'); // Retrieve userId from storage
     let currentAdId = null;
     let currentRecipientId = null;
 
     // Connect to WebSocket and initialize chat
     function connect() {
-        const socket = new SockJS('/ws');
+        const socket = new SockJS('/api/ws');
         stompClient = Stomp.over(socket);
 
         stompClient.connect({}, (frame) => {
@@ -280,7 +280,7 @@
         });
     }
     async function loadChatRooms() {
-        const response = await fetch(`/api/chatrooms/${userId}`);
+        const response = await fetch(`/api/api/chatrooms/${userId}`);
         const chatRooms = await response.json();
         const chatRoomsListContainer = document.getElementById("chatRoomsList");
         chatRoomsListContainer.innerHTML = ""; // Clear existing chat rooms
@@ -297,7 +297,7 @@
 
     // Load all available ads
     async function loadAds() {
-        const response = await fetch('/ads/all');
+        const response = await fetch('/api/ads/all');
         const ads = await response.json();
         const adsListContainer = document.getElementById("adsList");
         adsListContainer.innerHTML = ""; // Clear existing ads
@@ -315,7 +315,7 @@
         currentAdId = adId;
         currentRecipientId = recipientId;
 
-        const response = await fetch(`/messages/${adId}/${userId}/${recipientId}`);
+        const response = await fetch(`/api/messages/${adId}/${userId}/${recipientId}`);
         const messages = await response.json();
 
         const messagesContainer = document.getElementById("messages");
