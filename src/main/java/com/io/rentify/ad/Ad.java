@@ -1,8 +1,12 @@
 package com.io.rentify.ad;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.io.rentify.updatedUser.User;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 
 import java.util.List;
 
@@ -14,12 +18,24 @@ public class Ad {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user;
 
+    @NotBlank(message = "Title cannot be blank")
+    @Size(max = 100, message = "Title must be at most 100 characters")
     private String title;
+
+    @NotBlank(message = "Description cannot be blank")
+    @Size(max = 1000, message = "Description must be at most 1000 characters")
     private String description;
+
+    @Positive(message = "Price must be positive")
     private float price;
+
+    @NotBlank(message = "Location cannot be blank")
     private String location;
+
+    @NotBlank(message = "Category cannot be blank")
     private String category;
 
     @ElementCollection

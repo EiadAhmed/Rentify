@@ -5,6 +5,7 @@ import com.io.rentify.chat.ChatMessage;
 import com.io.rentify.chat.ChatMessageService;
 import com.io.rentify.updatedUser.User;
 import com.io.rentify.updatedUser.MyUserRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,8 +42,8 @@ public class AdController {
 //    }
 
 
-    @PostMapping("/create")
-    public Ad createAd(@RequestBody Ad ad, @AuthenticationPrincipal UserDetails userDetails) {
+    @PostMapping
+    public Ad createAd(@Valid @RequestBody Ad ad, @AuthenticationPrincipal UserDetails userDetails) {
         // Get the user from the repository
 
         User user = myUserRepository.findByEmail(userDetails.getUsername())
@@ -72,7 +73,7 @@ public class AdController {
     }
 
     @PutMapping("/{adId}")
-    public ResponseEntity<Ad> updateAd(@PathVariable Long adId, @RequestBody Ad updatedAd, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Ad> updateAd(@PathVariable Long adId,@Valid @RequestBody Ad updatedAd, @AuthenticationPrincipal UserDetails userDetails) {
         checkUser(adId, userDetails);
 
         return ResponseEntity.ok(adService.updateAd(adId, updatedAd, user));
@@ -104,57 +105,9 @@ public class AdController {
     public Ad updateAvailability(@PathVariable Long adId, @RequestParam Ad.Availability availability) {
         return adService.updateAvailability(adId, availability);
     }
-    @PostMapping("/{adId}/message")
-    public ChatMessage sendMessageToAdPoster(@PathVariable Long adId,
-                                             @RequestBody String messageContent,
-                                             @AuthenticationPrincipal UserDetails senderDetails) {
-        // Find the ad by adId
-        Ad ad = adService.findById(adId)
-                .orElseThrow(() -> new RuntimeException("Ad not found"));
 
-        // Get the sender and recipient (the user who posted the ad)
-        User sender = myUserRepository.findByEmail(senderDetails.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("Sender not found"));
-        User recipient = ad.getUser();
 
-        // Create a new ChatMessage
-        ChatMessage chatMessage = new ChatMessage();
-        chatMessage.setSenderId(sender.getId().toString());
-        chatMessage.setRecipientId(recipient.getId().toString());
-        chatMessage.setContent(messageContent);
-        chatMessage.setAdId(adId); // Associate the message with the specific ad
 
-        // Save the message
-        return chatMessageService.save(chatMessage);
-    }
-
-    @PostMapping("/{adId}/reply")
-    public ChatMessage replyToUser(@PathVariable Long adId,
-                                   @RequestBody String messageContent,
-                                   @AuthenticationPrincipal UserDetails adPosterDetails) {
-        // Find the ad by adId
-        Ad ad = adService.findById(adId)
-                .orElseThrow(() -> new RuntimeException("Ad not found"));
-
-        // Get the ad poster (recipient)
-        User recipient = ad.getUser();
-
-        // Get the sender (the user who initiated the chat)
-        String senderId = chatMessageService.findSenderId(adId, recipient.getId().toString());
-        if (senderId == null) {
-            throw new RuntimeException("No sender found for this ad");
-        }
-
-        // Create a new ChatMessage
-        ChatMessage chatMessage = new ChatMessage();
-        chatMessage.setSenderId(recipient.getId().toString());
-        chatMessage.setRecipientId(senderId);
-        chatMessage.setContent(messageContent);
-        chatMessage.setAdId(adId); // Associate the message with the specific ad
-
-        // Save the message
-        return chatMessageService.save(chatMessage);
-    }
 
 
 

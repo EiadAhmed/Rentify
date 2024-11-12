@@ -33,8 +33,8 @@ public class PasswordController {
             user.setTokenExpirationTime(LocalDateTime.now().plusHours(1)); // Token valid for 1 hour
             userRepository.save(user);
 
-            String resetUrl = "http://yourdomain.com/password/reset?token=" + token;
-//            sendResetEmail(user.getEmail(), resetUrl);
+            String resetUrl = "http://rentify.francecentral.cloudapp.azure.com:8080/api/password/reset?token=" + token;
+            sendResetEmail(user.getEmail(), resetUrl);
             System.out.println("Reset link: " + resetUrl);
             return ResponseEntity.ok("Password reset link sent to your email.");
         } else {
