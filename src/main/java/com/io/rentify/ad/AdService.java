@@ -2,6 +2,8 @@ package com.io.rentify.ad;
 
 import com.io.rentify.updatedUser.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -25,8 +27,8 @@ public class AdService {
         return adRepository.findByUser(user);
     }
 
-    public List<Ad> getAllAds() {
-        return adRepository.findAll();
+    public Page<Ad> getAllAds(Pageable pageable) {
+        return adRepository.findAll(pageable);
     }
 
     public Ad updateAvailability(Long adId, Ad.Availability availability) {

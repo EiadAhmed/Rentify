@@ -7,6 +7,7 @@ import com.io.rentify.updatedUser.User;
 import com.io.rentify.updatedUser.MyUserRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,7 +17,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
-
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
 import java.util.List;
 
 @RestController
@@ -54,9 +57,18 @@ public class AdController {
 
 
     }
-    @GetMapping("/all")
-    public ResponseEntity<List<Ad>> getAllAds() {
-        List<Ad> ads = adService.getAllAds();
+    @GetMapping
+    public ResponseEntity<Page<Ad>> getAllAds(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+//        // Parsing sort parameters
+//        String sortField = sort[0];
+//        String sortDirection = sort.length > 1 ? sort[1] : "asc";
+//        Sort.Direction direction = sortDirection.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Ad> ads = adService.getAllAds(pageable);
         return ResponseEntity.ok(ads);
     }
 
