@@ -10,8 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
@@ -57,7 +60,19 @@ public class AdController {
 
 
     }
+
+
     @GetMapping
+    public ResponseEntity<Page<Ad>> getAllApprovedAds(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Ad> ads = adService.getAllApprovedAds(pageable);
+        return ResponseEntity.ok(ads);
+    }
+
+
+    @GetMapping("/all")
     public ResponseEntity<Page<Ad>> getAllAds(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -127,7 +142,7 @@ public class AdController {
             @RequestParam(required = false) Float maxPrice,
             @RequestParam(required = false) Ad.Availability availability) {
 
-        List<Ad> ads = adService.searchAds(title, location, category, minPrice, maxPrice, availability);
+        List<Ad> ads = adService.searchApprovedAds(title, location, category, minPrice, maxPrice, availability);
 
         return ResponseEntity.ok(ads);
     }
@@ -138,6 +153,50 @@ public class AdController {
         List<Ad> similarAds = adService.getSimilarAds(ad);
         return ResponseEntity.ok(similarAds);
     }
+
+    @PatchMapping("/{adId}/approve")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Ad> approveAd(@PathVariable Long adId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!isAdmin) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to approve ads.");
+        }
+
+        return ResponseEntity.ok(adService.approveAd(adId));
+    }
+
+    @PatchMapping("/{adId}/reject")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Ad> rejectAd(@PathVariable Long adId, @RequestBody String feedback) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!isAdmin) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to reject ads.");
+        }
+        return ResponseEntity.ok(adService.rejectAd(adId, feedback));
+    }
+
+    @GetMapping("/pending")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<Ad>> getPendingAds() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!isAdmin) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to get ads.");
+        }
+        return ResponseEntity.ok(adService.getAdsByApprovalStatus(Ad.ApprovalStatus.PENDING));
+    }
+
 
 
 

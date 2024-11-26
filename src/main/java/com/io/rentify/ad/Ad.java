@@ -48,6 +48,32 @@ public class Ad {
         AVAILABLE, BOOKED
     }
 
+    @Enumerated(EnumType.STRING)
+    private ApprovalStatus approvalStatus = ApprovalStatus.PENDING;
+
+    public enum ApprovalStatus {
+        PENDING, APPROVED, REJECTED
+    }
+
+    public ApprovalStatus getApprovalStatus() {
+        return approvalStatus;
+    }
+
+    public void setApprovalStatus(ApprovalStatus approvalStatus) {
+        this.approvalStatus = approvalStatus;
+    }
+
+    @Column(length = 1000)
+    private String feedback;
+
+    public String getFeedback() {
+        return feedback;
+    }
+
+    public void setFeedback(String feedback) {
+        this.feedback = feedback;
+    }
+
     public Long getAdId() {
         return adId;
     }

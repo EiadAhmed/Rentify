@@ -5,10 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AdService {
@@ -28,8 +30,30 @@ public class AdService {
     }
 
     public Page<Ad> getAllAds(Pageable pageable) {
-        return adRepository.findAll(pageable);
+        boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities()
+                .stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+
+        if (isAdmin) {
+            // Admins see all ads
+            return adRepository.findAll(pageable);
+        } else {
+            // Regular users see only approved ads
+            return adRepository.findByApprovalStatus(Ad.ApprovalStatus.APPROVED, pageable);
+        }
     }
+
+    public Page<Ad> getAllApprovedAds(Pageable pageable) {
+        return adRepository.findByApprovalStatus(Ad.ApprovalStatus.APPROVED, pageable);
+    }
+
+    public List<Ad> searchApprovedAds(String title, String location, String category, Float minPrice, Float maxPrice, Ad.Availability availability) {
+        List<Ad> ads = adRepository.findAll(); // Adjust logic based on search filters.
+
+        return ads.stream()
+                .filter(ad -> ad.getApprovalStatus() == Ad.ApprovalStatus.APPROVED)
+                .collect(Collectors.toList());
+    }
+
 
     public Ad updateAvailability(Long adId, Ad.Availability availability) {
         Ad ad = adRepository.findById(adId).orElseThrow(() -> new RuntimeException("Ad not found"));
@@ -102,4 +126,26 @@ public class AdService {
     public List<Ad> getSimilarAds(Ad ad) {
         return adRepository.findByCategoryContainingIgnoreCase(ad.getCategory());
     }
+
+    public Ad approveAd(Long adId) {
+        Ad ad = adRepository.findById(adId)
+                .orElseThrow(() -> new RuntimeException("Ad not found"));
+        ad.setApprovalStatus(Ad.ApprovalStatus.APPROVED);
+        return adRepository.save(ad);
+    }
+
+    public Ad rejectAd(Long adId, String feedback) {
+        Ad ad = adRepository.findById(adId)
+                .orElseThrow(() -> new RuntimeException("Ad not found"));
+        ad.setApprovalStatus(Ad.ApprovalStatus.REJECTED);
+        ad.setFeedback(feedback);
+
+        return adRepository.save(ad);
+    }
+
+    public List<Ad> getAdsByApprovalStatus(Ad.ApprovalStatus approvalStatus) {
+        return adRepository.findByApprovalStatus(approvalStatus);
+    }
+
+
 }

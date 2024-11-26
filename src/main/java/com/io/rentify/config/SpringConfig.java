@@ -51,6 +51,10 @@ public class SpringConfig {
                     registry.requestMatchers("/home", "/register/**", "/authenticate","/api/authenticate", "/password/forgot", "/password/reset", "/ws/**", "/api/login", "/chatpage", "/ads").permitAll();
                     registry.requestMatchers("/admin/**").hasRole("ADMIN");
                     registry.requestMatchers("/user/**").hasAnyRole("USER", "ADMIN"); // Allow users with ROLE_USER
+                    registry.requestMatchers("/ads/{adId}/approve").hasRole("ADMIN");
+                    registry.requestMatchers("/ads/{adId}/reject").hasRole("ADMIN");
+                    registry.requestMatchers("/ads/{adId}/pending").hasRole("ADMIN");
+                    registry.requestMatchers("/ads/all").hasRole("ADMIN");
                     registry.requestMatchers("/ads/**").hasAnyRole("USER", "ADMIN");
                     registry.requestMatchers("/reviews/**").hasAnyRole("USER", "ADMIN");
                     registry.requestMatchers("/bookings/**").hasAnyRole("USER", "ADMIN");
