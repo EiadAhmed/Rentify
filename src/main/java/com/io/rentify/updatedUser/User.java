@@ -31,6 +31,17 @@ public class User {
     @Column(nullable = false)
     private String role; // Role can be a comma-separated list of roles, e.g., "ADMIN,USER"
 
+    @Column(nullable = false)
+    private boolean active = true; // Default is active
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
     public String getProfilePicture() {
         return profilePicture;
     }

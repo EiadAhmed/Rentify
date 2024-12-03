@@ -87,6 +87,7 @@ public class AdController {
         return ResponseEntity.ok(ads);
     }
 
+
     private User user;
 
     private void checkUser(@PathVariable Long adId, @AuthenticationPrincipal UserDetails userDetails) {

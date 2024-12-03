@@ -105,4 +105,12 @@ public class UserController {
         List<User> users = userRepository.findAll();
         return ResponseEntity.ok(users);
     }
+
+    @PutMapping("/{id}/deactivate")
+    public ResponseEntity<String> deactivateUser(@PathVariable Long id) {
+        myUserDetailService.deactivateUser(id);
+        return ResponseEntity.ok("User deactivated successfully.");
+    }
+
+
 }

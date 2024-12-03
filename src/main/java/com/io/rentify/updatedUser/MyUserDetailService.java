@@ -45,6 +45,13 @@ public class MyUserDetailService implements UserDetailsService {
         return user.getRole().split(","); // Split roles by comma
     }
 
+    public void deactivateUser(Long userId) {
+        User user = repository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        user.setActive(false);
+        repository.save(user);
+    }
+
     public List<User> findConnectedUsers() {
         return repository.findAllByStatus(Status.ONLINE);
     }
