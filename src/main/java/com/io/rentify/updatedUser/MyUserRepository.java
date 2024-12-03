@@ -11,4 +11,7 @@ public interface MyUserRepository extends JpaRepository<User, Long> {
     List<User> findAllByStatus(Status status);
     Optional<User> findByResetPasswordToken(String token); // New method for reset token
 
+    boolean existsByEmail(String email);
+
+
 }
