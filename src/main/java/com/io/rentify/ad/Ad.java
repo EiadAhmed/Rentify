@@ -74,6 +74,11 @@ public class Ad {
         this.feedback = feedback;
     }
 
+
+    public Long getUserId() {
+        return user != null ? user.getId() : null;
+    }
+
     public Long getAdId() {
         return adId;
     }

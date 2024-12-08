@@ -297,15 +297,17 @@
 
     // Load all available ads
     async function loadAds() {
-        const response = await fetch('/api/ads/all');
+        const response = await fetch('/api/ads');
         const ads = await response.json();
         const adsListContainer = document.getElementById("adsList");
+        console.log(Array.isArray(ads));  // Should return true if it's an array
+        console.log(ads);  // Inspect the content
         adsListContainer.innerHTML = ""; // Clear existing ads
         ads.forEach(ad => {
             const adDiv = document.createElement("div");
             console.log(ad);
             adDiv.textContent = ad.title;
-            adDiv.onclick = () => loadMessages(ad.adId, ad.user.id);
+            adDiv.onclick = () => loadMessages(ad.adId, ad.userId);
             adsListContainer.appendChild(adDiv);
         });
     }

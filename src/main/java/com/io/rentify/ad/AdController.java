@@ -24,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Page;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/ads")
@@ -63,12 +64,26 @@ public class AdController {
 
 
     @GetMapping
-    public ResponseEntity<Page<Ad>> getAllApprovedAds(
+    public  ResponseEntity<List<AdDTO>> getAllApprovedAds(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Ad> ads = adService.getAllApprovedAds(pageable);
-        return ResponseEntity.ok(ads);
+        List<AdDTO> adDTOs = ads.stream().map(ad -> {
+            AdDTO adDTO = new AdDTO();
+            adDTO.setAdId(ad.getAdId());
+            adDTO.setTitle(ad.getTitle());
+            adDTO.setDescription(ad.getDescription());
+            adDTO.setPrice(ad.getPrice());
+            adDTO.setLocation(ad.getLocation());
+            adDTO.setCategory(ad.getCategory());
+            adDTO.setPhotos(ad.getPhotos());
+            adDTO.setAvailability(ad.getAvailability());
+            adDTO.setUserId(ad.getUser() != null ? ad.getUser().getId() : null); // Set userId
+            return adDTO;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(adDTOs);
     }
 
 

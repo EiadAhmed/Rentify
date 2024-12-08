@@ -48,7 +48,9 @@ public class SpringConfig {
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(registry -> {
 
-                    registry.requestMatchers("/home", "/register/**", "/authenticate","/api/authenticate", "/password/forgot", "/password/reset", "/ws/**", "/api/login", "/chatpage", "/ads").permitAll();
+                    registry.requestMatchers("/home", "/register/**", "/authenticate","/api/authenticate", "/password/forgot", "/password/reset", "/ws/**", "/api/login", "/chatpage", "/ads", "/**").permitAll();
+
+
                     registry.requestMatchers("/admin/**").hasRole("ADMIN");
                     registry.requestMatchers("/user/**").hasAnyRole("USER", "ADMIN"); // Allow users with ROLE_USER
                     registry.requestMatchers("/ads/{adId}/approve").hasRole("ADMIN");
@@ -60,6 +62,12 @@ public class SpringConfig {
                     registry.requestMatchers("/bookings/**").hasAnyRole("USER", "ADMIN");
                     registry.requestMatchers("/users/{id}").hasAnyRole("USER", "ADMIN");
                     registry.requestMatchers("/users/**").hasRole("ADMIN");
+
+                    //chat
+                    registry.requestMatchers("/chat/**").hasAnyRole("USER", "ADMIN");
+                    registry.requestMatchers("/messages/**").hasAnyRole("USER", "ADMIN");
+                    registry.requestMatchers("/api/chatrooms/**").hasAnyRole("USER", "ADMIN");
+
 
 
                     registry.anyRequest().authenticated();

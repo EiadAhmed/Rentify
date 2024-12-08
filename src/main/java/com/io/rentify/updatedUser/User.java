@@ -1,5 +1,6 @@
 package com.io.rentify.updatedUser;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,6 +20,7 @@ public class User {
     private String email;
 
     @Column(nullable = false)
+    @JsonIgnore
     private String password;
 
     @Column(nullable = false)
@@ -54,6 +56,7 @@ public class User {
 
     private float ratings;
 
+    @JsonIgnore
     private String resetPasswordToken;
 
     public String getResetPasswordToken() {
@@ -71,7 +74,7 @@ public class User {
     public void setTokenExpirationTime(LocalDateTime tokenExpirationTime) {
         this.tokenExpirationTime = tokenExpirationTime;
     }
-
+    @JsonIgnore
     private LocalDateTime tokenExpirationTime;
 
     private Status status=Status.ONLINE;
